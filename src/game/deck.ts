@@ -1,4 +1,4 @@
-import { Card, CardNumber, CardShape, CardShading, CardColor } from '../types/game';
+import type { Card, CardNumber, CardShape, CardShading, CardColor } from '../types/game';
 
 // Generate all 81 unique cards for a Set deck
 export function generateDeck(): Card[] {

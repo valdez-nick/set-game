@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { GameState } from '../types/game';
+import type { GameState } from '../types/game';
 
 interface GameStatsProps {
   gameState: GameState;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card as CardType, GameState } from '../types/game';
+import type { Card as CardType, GameState } from '../types/game';
 import Card from './Card';
 
 interface GameBoardProps {

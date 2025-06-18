@@ -1,4 +1,4 @@
-import { Card } from '../types/game';
+import type { Card } from '../types/game';
 
 // Check if three cards form a valid set
 export function isValidSet(card1: Card, card2: Card, card3: Card): boolean {

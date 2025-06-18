@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GameState, Card } from '../types/game';
+import type { GameState, Card } from '../types/game';
 import { initializeGame, selectCard, addMoreCards, useHint } from '../game/gameLogic';
 import GameBoard from './GameBoard';
 import GameStats from './GameStats';

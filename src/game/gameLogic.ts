@@ -1,4 +1,4 @@
-import { Card, GameState } from '../types/game';
+import type { Card, GameState } from '../types/game';
 import { generateDeck } from './deck';
 import { isValidSet, hasValidSet } from './setValidation';
 

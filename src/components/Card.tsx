@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card as CardType } from '../types/game';
+import type { Card as CardType } from '../types/game';
 
 interface CardProps {
   card: CardType;
