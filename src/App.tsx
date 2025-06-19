@@ -1,7 +1,7 @@
-import Game from './components/Game'
+import GameContainer from './components/GameContainer'
 
 function App() {
-  return <Game />
+  return <GameContainer />
 }
 
 export default App
