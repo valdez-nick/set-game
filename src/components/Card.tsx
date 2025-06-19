@@ -28,6 +28,7 @@ const Card: React.FC<CardProps> = ({ card, isSelected, isHinted, onClick }) => {
       shading={shading}
       color={cardColor}
       index={i}
+      cardId={card.id}
     />
   ));
   
@@ -53,10 +54,11 @@ interface ShapeProps {
   shading: 'solid' | 'striped' | 'outline';
   color: string;
   index: number;
+  cardId: string;
 }
 
-const Shape: React.FC<ShapeProps> = ({ shape, shading, color, index }) => {
-  const id = `shape-${shape}-${index}-${Date.now()}`;
+const Shape: React.FC<ShapeProps> = ({ shape, shading, color, index, cardId }) => {
+  const id = `shape-${cardId}-${shape}-${index}-${shading}`;
   
   const getPath = () => {
     switch (shape) {
