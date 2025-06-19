@@ -6,26 +6,34 @@ interface GameStatsProps {
   onNewGame: () => void;
   onAddCards: () => void;
   onUseHint: () => void;
+  onPauseTimer: () => void;
+  onResumeTimer: () => void;
 }
 
 const GameStats: React.FC<GameStatsProps> = ({ 
   gameState, 
   onNewGame, 
   onAddCards, 
-  onUseHint 
+  onUseHint,
+  onPauseTimer,
+  onResumeTimer
 }) => {
-  const { foundSets, deck, hints, startTime, isGameOver } = gameState;
+  const { foundSets, deck, hints, startTime, timerState, pausedTime, isGameOver } = gameState;
   const [elapsedTime, setElapsedTime] = useState(0);
   
   useEffect(() => {
-    if (!isGameOver) {
+    if (!isGameOver && timerState === 'running') {
       const interval = setInterval(() => {
-        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+        const currentTime = Math.floor((Date.now() - startTime + pausedTime) / 1000);
+        setElapsedTime(currentTime);
       }, 1000);
       
       return () => clearInterval(interval);
+    } else if (timerState === 'paused') {
+      // Keep the elapsed time static when paused
+      setElapsedTime(Math.floor(pausedTime / 1000));
     }
-  }, [startTime, isGameOver]);
+  }, [startTime, pausedTime, timerState, isGameOver]);
   
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -53,8 +61,12 @@ const GameStats: React.FC<GameStatsProps> = ({
               <div className="text-2xl font-bold">{deck.length}</div>
             </div>
             <div className="text-center">
-              <div className="text-sm text-gray-600">Time</div>
-              <div className="text-2xl font-bold">{formatTime(elapsedTime)}</div>
+              <div className="text-sm text-gray-600">
+                Time {timerState === 'not-started' ? '⏱️' : timerState === 'paused' ? '⏸️' : '▶️'}
+              </div>
+              <div className="text-2xl font-bold">
+                {timerState === 'not-started' ? '--:--' : formatTime(elapsedTime)}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-sm text-gray-600">Hints Left</div>
@@ -85,6 +97,14 @@ const GameStats: React.FC<GameStatsProps> = ({
           >
             Hint ({hints})
           </button>
+          {timerState !== 'not-started' && !isGameOver && (
+            <button
+              onClick={timerState === 'running' ? onPauseTimer : onResumeTimer}
+              className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+            >
+              {timerState === 'running' ? '⏸️ Pause' : '▶️ Resume'}
+            </button>
+          )}
         </div>
         
         {/* Game over message */}

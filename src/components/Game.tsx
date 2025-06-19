@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState, Card } from '../types/game';
-import { initializeGame, selectCard, addMoreCards, useHint } from '../game/gameLogic';
+import { initializeGame, selectCard, addMoreCards, useHint, pauseTimer, resumeTimer } from '../game/gameLogic';
 import GameBoard from './GameBoard';
 import GameStats from './GameStats';
 
@@ -47,6 +47,16 @@ const Game: React.FC = () => {
     }
   };
   
+  const handlePauseTimer = () => {
+    const newGameState = pauseTimer(gameState);
+    setGameState(newGameState);
+  };
+  
+  const handleResumeTimer = () => {
+    const newGameState = resumeTimer(gameState);
+    setGameState(newGameState);
+  };
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="container mx-auto py-8">
@@ -59,6 +69,8 @@ const Game: React.FC = () => {
           onNewGame={handleNewGame}
           onAddCards={handleAddCards}
           onUseHint={handleUseHint}
+          onPauseTimer={handlePauseTimer}
+          onResumeTimer={handleResumeTimer}
         />
         
         <GameBoard
@@ -74,6 +86,7 @@ const Game: React.FC = () => {
             <li>• Find sets of 3 cards where each feature is either all the same or all different</li>
             <li>• Features: Number (1-3), Shape (diamond, oval, squiggle), Shading (solid, striped, outline), and Color (red, green, purple)</li>
             <li>• Click cards to select them - when you select 3 cards, they'll automatically be checked</li>
+            <li>• Timer starts when you click your first card - you can pause and resume anytime!</li>
             <li>• Use hints if you're stuck, or add more cards if no sets are visible</li>
           </ul>
         </div>

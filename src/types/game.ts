@@ -13,6 +13,8 @@ export interface Card {
   color: CardColor;
 }
 
+export type TimerState = 'not-started' | 'running' | 'paused';
+
 export interface GameState {
   deck: Card[];
   board: Card[];
@@ -21,6 +23,8 @@ export interface GameState {
   score: number;
   hints: number;
   startTime: number;
+  timerState: TimerState;
+  pausedTime: number;
   isGameOver: boolean;
 }
 

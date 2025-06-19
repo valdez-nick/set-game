@@ -22,19 +22,26 @@ export function initializeGame(): GameState {
     foundSets: [],
     score: 0,
     hints: 3,
-    startTime: Date.now(),
+    startTime: 0,
+    timerState: 'not-started',
+    pausedTime: 0,
     isGameOver: false
   };
 }
 
 export function selectCard(gameState: GameState, card: Card): GameState {
-  const { selectedCards } = gameState;
+  const { selectedCards, timerState } = gameState;
+  
+  // Start timer on first card click
+  const newGameState = timerState === 'not-started' 
+    ? { ...gameState, startTime: Date.now(), timerState: 'running' as const }
+    : gameState;
   
   // If card is already selected, deselect it
   const isAlreadySelected = selectedCards.some(c => c.id === card.id);
   if (isAlreadySelected) {
     return {
-      ...gameState,
+      ...newGameState,
       selectedCards: selectedCards.filter(c => c.id !== card.id)
     };
   }
@@ -42,7 +49,7 @@ export function selectCard(gameState: GameState, card: Card): GameState {
   // If we already have 3 cards selected, replace the selection
   if (selectedCards.length >= 3) {
     return {
-      ...gameState,
+      ...newGameState,
       selectedCards: [card]
     };
   }
@@ -54,12 +61,12 @@ export function selectCard(gameState: GameState, card: Card): GameState {
   if (newSelectedCards.length === 3) {
     const [card1, card2, card3] = newSelectedCards;
     if (isValidSet(card1, card2, card3)) {
-      return handleValidSet(gameState, newSelectedCards);
+      return handleValidSet(newGameState, newSelectedCards);
     }
   }
   
   return {
-    ...gameState,
+    ...newGameState,
     selectedCards: newSelectedCards
   };
 }
@@ -144,4 +151,28 @@ function findAllValidSets(board: Card[]): Card[][] {
   }
   
   return sets;
+}
+
+export function pauseTimer(gameState: GameState): GameState {
+  if (gameState.timerState !== 'running') {
+    return gameState;
+  }
+  
+  return {
+    ...gameState,
+    timerState: 'paused',
+    pausedTime: gameState.pausedTime + (Date.now() - gameState.startTime)
+  };
+}
+
+export function resumeTimer(gameState: GameState): GameState {
+  if (gameState.timerState !== 'paused') {
+    return gameState;
+  }
+  
+  return {
+    ...gameState,
+    timerState: 'running',
+    startTime: Date.now()
+  };
 }
