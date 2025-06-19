@@ -12,6 +12,7 @@ import GameModeSelector from './multiplayer/GameModeSelector';
 import type { PlayerConfig } from './multiplayer/GameModeSelector';
 import HamburgerMenu from './navigation/HamburgerMenu';
 import Scoreboard from './Scoreboard';
+import P2PGameLobby from './multiplayer/P2PGameLobby';
 
 const GameContainer: React.FC = () => {
   const [gameState, setGameState] = useState<MultiplayerGameState | null>(null);
@@ -19,6 +20,8 @@ const GameContainer: React.FC = () => {
   const [visualHints, setVisualHints] = useState<Set<string>>(new Set());
   const [showScoreboard, setShowScoreboard] = useState(false);
   const [showModeSelector, setShowModeSelector] = useState(true);
+  const [showP2PLobby, setShowP2PLobby] = useState(false);
+  const [onlineDifficulty, setOnlineDifficulty] = useState<DifficultyLevel>('normal');
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
 
   // Initialize with mode selector
@@ -70,6 +73,33 @@ const GameContainer: React.FC = () => {
     setGameState(newGameState);
     setShowModeSelector(false);
     setCurrentPlayerIndex(0);
+  };
+
+  // Handle online game mode selection
+  const handleStartOnlineGame = (difficulty: DifficultyLevel) => {
+    setOnlineDifficulty(difficulty);
+    setShowModeSelector(false);
+    setShowP2PLobby(true);
+  };
+
+  // Handle P2P game start
+  const handleP2PGameStart = (isHost: boolean) => {
+    // For now, we'll initialize a multiplayer game
+    // In a full implementation, this would sync with other players
+    const players: PlayerConfig[] = [
+      { name: 'Player 1', color: '#3B82F6' },
+      { name: 'Player 2', color: '#EF4444' }
+    ];
+    const newGameState = initializeMultiplayerGame('multi', players, onlineDifficulty);
+    setGameState(newGameState);
+    setShowP2PLobby(false);
+    setCurrentPlayerIndex(0);
+  };
+
+  // Handle P2P lobby cancel
+  const handleP2PLobbyCancel = () => {
+    setShowP2PLobby(false);
+    setShowModeSelector(true);
   };
 
   // Handle card click with multiplayer support
@@ -157,11 +187,24 @@ const GameContainer: React.FC = () => {
     return (
       <GameModeSelector
         onStartGame={handleStartGame}
+        onStartOnlineGame={handleStartOnlineGame}
         onCancel={() => {
           if (gameState) {
             setShowModeSelector(false);
           }
         }}
+      />
+    );
+  }
+
+  // Show P2P lobby
+  if (showP2PLobby) {
+    return (
+      <P2PGameLobby
+        onStartGame={handleP2PGameStart}
+        onCancel={handleP2PLobbyCancel}
+        difficulty={onlineDifficulty}
+        maxPlayers={4}
       />
     );
   }

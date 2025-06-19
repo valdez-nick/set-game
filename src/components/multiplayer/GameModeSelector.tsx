@@ -3,6 +3,7 @@ import type { DifficultyLevel } from '../../types/difficulty';
 
 interface GameModeSelectorProps {
   onStartGame: (mode: 'single' | 'multi', players: PlayerConfig[], difficulty: DifficultyLevel) => void;
+  onStartOnlineGame: (difficulty: DifficultyLevel) => void;
   onCancel: () => void;
 }
 
@@ -13,8 +14,8 @@ export interface PlayerConfig {
 
 const PLAYER_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B']; // Blue, Red, Green, Yellow
 
-const GameModeSelector: React.FC<GameModeSelectorProps> = ({ onStartGame, onCancel }) => {
-  const [selectedMode, setSelectedMode] = useState<'single' | 'multi' | null>(null);
+const GameModeSelector: React.FC<GameModeSelectorProps> = ({ onStartGame, onStartOnlineGame, onCancel }) => {
+  const [selectedMode, setSelectedMode] = useState<'single' | 'multi' | 'online' | null>(null);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>('normal');
   const [playerCount, setPlayerCount] = useState(2);
   const [players, setPlayers] = useState<PlayerConfig[]>([
@@ -24,7 +25,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({ onStartGame, onCanc
     { name: 'Player 4', color: PLAYER_COLORS[3] },
   ]);
 
-  const handleModeSelect = (mode: 'single' | 'multi') => {
+  const handleModeSelect = (mode: 'single' | 'multi' | 'online') => {
     setSelectedMode(mode);
     if (mode === 'single') {
       setPlayers([{ name: 'Chace', color: PLAYER_COLORS[0] }]);
@@ -39,10 +40,14 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({ onStartGame, onCanc
 
   const handleStartGame = () => {
     if (selectedMode) {
-      const activePlayers = selectedMode === 'single' 
-        ? [players[0]] 
-        : players.slice(0, playerCount);
-      onStartGame(selectedMode, activePlayers, difficulty);
+      if (selectedMode === 'online') {
+        onStartOnlineGame(difficulty);
+      } else {
+        const activePlayers = selectedMode === 'single' 
+          ? [players[0]] 
+          : players.slice(0, playerCount);
+        onStartGame(selectedMode, activePlayers, difficulty);
+      }
     }
   };
 
@@ -71,7 +76,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({ onStartGame, onCanc
           {!selectedMode && (
             <div>
               <h3 className="text-xl font-semibold mb-4">Choose Game Mode</h3>
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <button
                   onClick={() => handleModeSelect('single')}
                   className="p-6 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
@@ -87,9 +92,19 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({ onStartGame, onCanc
                   className="p-6 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
                 >
                   <div className="text-4xl mb-2">👥</div>
-                  <div className="text-lg font-semibold">Multiplayer</div>
+                  <div className="text-lg font-semibold">Local Multiplayer</div>
                   <div className="text-sm text-gray-600 mt-1">
-                    Compete with 2-4 players
+                    Compete with 2-4 players locally
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleModeSelect('online')}
+                  className="p-6 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                >
+                  <div className="text-4xl mb-2">🌐</div>
+                  <div className="text-lg font-semibold">Online Multiplayer</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Play with friends remotely
                   </div>
                 </button>
               </div>
