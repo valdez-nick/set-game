@@ -6,9 +6,10 @@ interface CardProps {
   isSelected: boolean;
   isHinted?: boolean;
   onClick: (card: CardType) => void;
+  selectionColor?: string;
 }
 
-const Card: React.FC<CardProps> = ({ card, isSelected, isHinted, onClick }) => {
+const Card: React.FC<CardProps> = ({ card, isSelected, isHinted, onClick, selectionColor }) => {
   const { number, shape, shading, color } = card;
   
   // Color mapping
@@ -38,9 +39,13 @@ const Card: React.FC<CardProps> = ({ card, isSelected, isHinted, onClick }) => {
       className={`
         relative w-full aspect-[3/4] bg-white rounded-lg shadow-md cursor-pointer
         transition-all duration-200 hover:shadow-lg hover:scale-105
-        ${isSelected ? 'ring-4 ring-blue-500 shadow-xl scale-105' : ''}
+        ${isSelected && !selectionColor ? 'ring-4 ring-blue-500 shadow-xl scale-105' : ''}
         ${isHinted ? 'ring-4 ring-yellow-400 animate-pulse' : ''}
       `}
+      style={isSelected && selectionColor ? {
+        boxShadow: `0 0 0 4px ${selectionColor}`,
+        transform: 'scale(1.05)'
+      } : {}}
     >
       <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
         {shapes}

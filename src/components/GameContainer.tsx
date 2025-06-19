@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Card } from '../types/game';
 import type { MultiplayerGameState } from '../types/multiplayer';
 import type { DifficultyLevel } from '../types/difficulty';
-import { initializeMultiplayerGame, selectMultiplayerCard, handleTurnTimeout } from '../game/multiplayerLogic';
+import { initializeMultiplayerGame, selectMultiplayerCard } from '../game/multiplayerLogic';
 import { addMoreCards, useHint, pauseTimer, resumeTimer, saveCurrentGameResult } from '../game/gameLogic';
 import { getVisualHints } from '../game/difficultyManager';
 import GameBoard from './GameBoard';
@@ -51,17 +51,6 @@ const GameContainer: React.FC = () => {
     }
   }, [hintedCards]);
 
-  // Handle turn timeout for multiplayer
-  const handleTimeOut = () => {
-    if (gameState && gameState.gameMode === 'multi') {
-      const newGameState = handleTurnTimeout(gameState);
-      setGameState(newGameState);
-      // Update current player index
-      if (newGameState.currentTurn) {
-        setCurrentPlayerIndex(newGameState.currentTurn.currentPlayerIndex);
-      }
-    }
-  };
 
   // Start new game with selected mode
   const handleStartGame = (
@@ -115,10 +104,6 @@ const GameContainer: React.FC = () => {
       setHintedCards([]);
     }
 
-    // Update current player if turn changed
-    if (newGameState.currentTurn && newGameState.currentTurn.currentPlayerIndex !== currentPlayerIndex) {
-      setCurrentPlayerIndex(newGameState.currentTurn.currentPlayerIndex);
-    }
   };
 
   // Handle new game
@@ -242,10 +227,39 @@ const GameContainer: React.FC = () => {
 
         {/* Multiplayer Stats */}
         {gameState.gameMode === 'multi' && (
-          <MultiplayerStats
-            gameState={gameState}
-            onTimeOut={handleTimeOut}
-          />
+          <>
+            <MultiplayerStats
+              gameState={gameState}
+            />
+            {/* Player Selector for Local Multiplayer */}
+            <div className="w-full max-w-6xl mx-auto px-4 mb-4">
+              <div className="bg-white rounded-lg shadow-md p-4">
+                <div className="flex items-center justify-center gap-4">
+                  <span className="text-sm font-medium text-gray-700">Current Player:</span>
+                  <div className="flex gap-2">
+                    {gameState.players.map((player, index) => (
+                      <button
+                        key={player.id}
+                        onClick={() => setCurrentPlayerIndex(index)}
+                        className={`
+                          px-4 py-2 rounded-lg font-medium transition-all
+                          ${currentPlayerIndex === index 
+                            ? 'text-white shadow-lg transform scale-105' 
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }
+                        `}
+                        style={currentPlayerIndex === index ? {
+                          backgroundColor: player.color
+                        } : {}}
+                      >
+                        {player.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         {/* Single Player Stats */}
@@ -279,7 +293,8 @@ const GameContainer: React.FC = () => {
             <li>• Click cards to select them - when you select 3 cards, they'll automatically be checked</li>
             {gameState.gameMode === 'multi' && (
               <>
-                <li>• Take turns finding sets - you have {gameState.difficulty.turnDuration} seconds per turn</li>
+                <li>• All players play simultaneously - race to find sets!</li>
+                <li>• Each player's selections show in their color</li>
                 <li>• Score multiplier: {gameState.difficulty.scoreMultiplier}x for {gameState.difficulty.level} difficulty</li>
               </>
             )}

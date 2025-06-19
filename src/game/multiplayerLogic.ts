@@ -1,8 +1,7 @@
 import type { Card } from '../types/game';
 import type { 
   MultiplayerGameState, 
-  Player, 
-  TurnInfo,
+  Player,
   GameMode 
 } from '../types/multiplayer';
 import type { DifficultyLevel } from '../types/difficulty';
@@ -31,18 +30,9 @@ export function initializeMultiplayerGame(
     score: 0,
     setsFound: 0,
     mistakes: 0,
-    isActive: index === 0, // First player starts
-    isConnected: true
+    isConnected: true,
+    selectedCards: []
   }));
-  
-  // Initialize turn info for multiplayer
-  const turnInfo: TurnInfo | null = mode === 'multi' ? {
-    currentPlayerIndex: 0,
-    turnStartTime: 0, // Will be set when first card is clicked
-    turnDuration: difficultyConfig.turnDuration,
-    timeRemaining: difficultyConfig.turnDuration,
-    canSteal: false
-  } : null;
   
   return {
     sessionId: generateGameId(),
@@ -59,12 +49,9 @@ export function initializeMultiplayerGame(
     isGameOver: false,
     gameMode: mode,
     players: gamePlayers,
-    currentTurn: turnInfo,
     difficulty: difficultyConfig,
     multiplayerSettings: mode === 'multi' ? {
-      mode: 'competitive',
-      enableSteal: true,
-      enableTurnTimer: true
+      mode: 'competitive'
     } : undefined,
     roundNumber: 1,
     gameStartTime: Date.now()
@@ -79,65 +66,76 @@ export function selectMultiplayerCard(
   card: Card,
   playerIndex: number
 ): MultiplayerGameState {
-  const { selectedCards, gameMode, currentTurn, timerState } = gameState;
+  const { gameMode, timerState, players } = gameState;
   
   // Single player mode - use regular logic
   if (gameMode === 'single') {
     return selectCardSinglePlayer(gameState, card);
   }
   
-  // Multiplayer validations
-  if (!currentTurn || currentTurn.currentPlayerIndex !== playerIndex) {
-    return gameState; // Not this player's turn
-  }
+  // Get current player's selection
+  const player = players[playerIndex];
+  const playerSelectedCards = player.selectedCards || [];
   
-  // Start turn timer on first card selection
+  // Start game timer on first card selection
   let newGameState = gameState;
   if (timerState === 'not-started') {
     newGameState = {
       ...gameState,
       startTime: Date.now(),
-      timerState: 'running',
-      currentTurn: {
-        ...currentTurn,
-        turnStartTime: Date.now()
-      }
+      timerState: 'running'
     };
   }
   
-  // Handle card selection/deselection
-  const isAlreadySelected = selectedCards.some(c => c.id === card.id);
+  // Handle card selection/deselection for this player
+  const isAlreadySelected = playerSelectedCards.includes(card.id);
+  let newPlayerSelectedCards: string[];
+  
   if (isAlreadySelected) {
-    return {
-      ...newGameState,
-      selectedCards: selectedCards.filter(c => c.id !== card.id)
-    };
+    // Deselect card
+    newPlayerSelectedCards = playerSelectedCards.filter(id => id !== card.id);
+  } else if (playerSelectedCards.length >= 3) {
+    // Replace selection if already have 3
+    newPlayerSelectedCards = [card.id];
+  } else {
+    // Add to selection
+    newPlayerSelectedCards = [...playerSelectedCards, card.id];
   }
   
-  // If we already have 3 cards selected, replace the selection
-  if (selectedCards.length >= 3) {
-    return {
-      ...newGameState,
-      selectedCards: [card]
-    };
-  }
+  // Update player's selection
+  const updatedPlayers = [...newGameState.players];
+  updatedPlayers[playerIndex] = {
+    ...updatedPlayers[playerIndex],
+    selectedCards: newPlayerSelectedCards
+  };
   
-  // Add card to selection
-  const newSelectedCards = [...selectedCards, card];
-  
-  // If we now have 3 cards, check if it's a valid set
-  if (newSelectedCards.length === 3) {
-    const [card1, card2, card3] = newSelectedCards;
-    if (isValidSet(card1, card2, card3)) {
-      return handleMultiplayerValidSet(newGameState, newSelectedCards, playerIndex);
-    } else {
-      return handleMultiplayerWrongGuess(newGameState, playerIndex);
+  // Check if player has selected 3 cards
+  if (newPlayerSelectedCards.length === 3) {
+    const selectedCardObjects = newPlayerSelectedCards
+      .map(id => newGameState.board.find(c => c.id === id))
+      .filter(Boolean) as Card[];
+    
+    if (selectedCardObjects.length === 3) {
+      const [card1, card2, card3] = selectedCardObjects;
+      if (isValidSet(card1, card2, card3)) {
+        return handleMultiplayerValidSet(
+          { ...newGameState, players: updatedPlayers },
+          selectedCardObjects,
+          playerIndex
+        );
+      } else {
+        return handleMultiplayerWrongGuess(
+          { ...newGameState, players: updatedPlayers },
+          playerIndex
+        );
+      }
     }
   }
   
   return {
     ...newGameState,
-    selectedCards: newSelectedCards
+    players: updatedPlayers,
+    selectedCards: [] // Keep global selectedCards empty for multiplayer
   };
 }
 
@@ -151,12 +149,16 @@ function handleMultiplayerValidSet(
 ): MultiplayerGameState {
   const { board, deck, foundSets, players, difficulty } = gameState;
   
-  // Update player score
+  // Update player score and clear their selection
   const updatedPlayers = [...players];
   const basePoints = 1;
   const points = Math.round(basePoints * difficulty.scoreMultiplier);
-  updatedPlayers[playerIndex].score += points;
-  updatedPlayers[playerIndex].setsFound += 1;
+  updatedPlayers[playerIndex] = {
+    ...updatedPlayers[playerIndex],
+    score: updatedPlayers[playerIndex].score + points,
+    setsFound: updatedPlayers[playerIndex].setsFound + 1,
+    selectedCards: [] // Clear selection after valid set
+  };
   
   // Remove found set from board
   let newBoard = board.filter(card => !foundSet.some(setCard => setCard.id === card.id));
@@ -175,29 +177,13 @@ function handleMultiplayerValidSet(
   // Check if game is over
   const isGameOver = newDeck.length === 0 && !hasValidSet(newBoard);
   
-  // Move to next player's turn (if not game over)
-  const nextPlayerIndex = isGameOver ? playerIndex : (playerIndex + 1) % players.length;
-  const newTurn = gameState.currentTurn ? {
-    ...gameState.currentTurn,
-    currentPlayerIndex: nextPlayerIndex,
-    turnStartTime: Date.now(),
-    canSteal: false
-  } : null;
-  
-  // Update active player
-  const newPlayers = updatedPlayers.map((p, i) => ({
-    ...p,
-    isActive: i === nextPlayerIndex
-  }));
-  
   return {
     ...gameState,
     board: newBoard,
     deck: newDeck,
     selectedCards: [],
     foundSets: [...foundSets, foundSet],
-    players: newPlayers,
-    currentTurn: newTurn,
+    players: updatedPlayers,
     score: gameState.score + points,
     isGameOver
   };
@@ -210,63 +196,26 @@ function handleMultiplayerWrongGuess(
   gameState: MultiplayerGameState,
   playerIndex: number
 ): MultiplayerGameState {
-  const { players, difficulty, currentTurn } = gameState;
+  const { players, difficulty } = gameState;
   
-  // Update player mistakes and apply penalty
+  // Update player mistakes, apply penalty, and clear selection
   const updatedPlayers = [...players];
-  updatedPlayers[playerIndex].mistakes += 1;
-  
-  if (difficulty.wrongGuessPenalty > 0) {
-    updatedPlayers[playerIndex].score = Math.max(
-      0, 
-      updatedPlayers[playerIndex].score - difficulty.wrongGuessPenalty
-    );
-  }
-  
-  // Enable steal mode if configured
-  const newTurn = currentTurn && gameState.multiplayerSettings?.enableSteal ? {
-    ...currentTurn,
-    canSteal: true
-  } : currentTurn;
+  updatedPlayers[playerIndex] = {
+    ...updatedPlayers[playerIndex],
+    mistakes: updatedPlayers[playerIndex].mistakes + 1,
+    score: difficulty.wrongGuessPenalty > 0
+      ? Math.max(0, updatedPlayers[playerIndex].score - difficulty.wrongGuessPenalty)
+      : updatedPlayers[playerIndex].score,
+    selectedCards: [] // Clear selection after wrong guess
+  };
   
   return {
     ...gameState,
     selectedCards: [],
-    players: updatedPlayers,
-    currentTurn: newTurn
+    players: updatedPlayers
   };
 }
 
-/**
- * Handle turn timeout in multiplayer
- */
-export function handleTurnTimeout(gameState: MultiplayerGameState): MultiplayerGameState {
-  const { players, currentTurn } = gameState;
-  
-  if (!currentTurn || gameState.gameMode === 'single') return gameState;
-  
-  // Move to next player
-  const nextPlayerIndex = (currentTurn.currentPlayerIndex + 1) % players.length;
-  const newPlayers = players.map((p, i) => ({
-    ...p,
-    isActive: i === nextPlayerIndex
-  }));
-  
-  const newTurn: TurnInfo = {
-    currentPlayerIndex: nextPlayerIndex,
-    turnStartTime: Date.now(),
-    turnDuration: currentTurn.turnDuration,
-    timeRemaining: currentTurn.turnDuration,
-    canSteal: false
-  };
-  
-  return {
-    ...gameState,
-    selectedCards: [],
-    players: newPlayers,
-    currentTurn: newTurn
-  };
-}
 
 /**
  * Handle single player card selection (fallback)
@@ -313,16 +262,3 @@ function selectCardSinglePlayer(gameState: MultiplayerGameState, card: Card): Mu
   };
 }
 
-/**
- * Get current player turn time remaining
- */
-export function getTurnTimeRemaining(gameState: MultiplayerGameState): number {
-  const { currentTurn, timerState } = gameState;
-  
-  if (!currentTurn || gameState.gameMode === 'single' || timerState !== 'running') {
-    return 0;
-  }
-  
-  const elapsed = Math.floor((Date.now() - currentTurn.turnStartTime) / 1000);
-  return Math.max(0, currentTurn.turnDuration - elapsed);
-}
