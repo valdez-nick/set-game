@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { p2pService, P2PPlayer } from '../../services/p2pService';
+import { p2pService, type P2PPlayer } from '../../services/p2pService';
 import type { DifficultyLevel } from '../../types/difficulty';
 
 interface P2PGameLobbyProps {
@@ -71,7 +71,7 @@ const P2PGameLobby: React.FC<P2PGameLobbyProps> = ({
         difficulty: { level: difficulty }
       };
       
-      const roomId = await p2pService.createRoom(playerName, dummyGameState);
+      await p2pService.createRoom(playerName, dummyGameState);
       setMode('create');
       setConnectionStatus('connected');
     } catch (error) {

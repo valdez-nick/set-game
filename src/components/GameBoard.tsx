@@ -1,16 +1,18 @@
 import React from 'react';
-import type { Card as CardType } from '../types/game';
+import type { Card as CardType, GameState } from '../types/game';
 import type { MultiplayerGameState } from '../types/multiplayer';
 import Card from './Card';
 
 interface GameBoardProps {
-  gameState: MultiplayerGameState;
+  gameState: MultiplayerGameState | GameState;
   onCardClick: (card: CardType) => void;
   hintedCards?: CardType[];
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ gameState, onCardClick, hintedCards = [] }) => {
-  const { board, selectedCards, gameMode, players } = gameState;
+  const { board, selectedCards } = gameState;
+  const gameMode = 'gameMode' in gameState ? gameState.gameMode : 'single';
+  const players = 'players' in gameState ? gameState.players : [];
   
   // For multiplayer, get selections from all players
   const getCardSelectionInfo = (cardId: string) => {

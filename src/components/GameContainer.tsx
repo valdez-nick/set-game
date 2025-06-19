@@ -72,7 +72,7 @@ const GameContainer: React.FC = () => {
   };
 
   // Handle P2P game start
-  const handleP2PGameStart = (isHost: boolean) => {
+  const handleP2PGameStart = () => {
     // For now, we'll initialize a multiplayer game
     // In a full implementation, this would sync with other players
     const players: PlayerConfig[] = [

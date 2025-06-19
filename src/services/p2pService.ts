@@ -1,6 +1,6 @@
-import Peer, { DataConnection } from 'peerjs';
+import Peer from 'peerjs';
+import type { DataConnection } from 'peerjs';
 import type { MultiplayerGameState, Player } from '../types/multiplayer';
-import type { Card } from '../types/game';
 
 // P2P Message types
 export type P2PMessage = 
@@ -193,7 +193,6 @@ export class P2PGameService {
           score: 0,
           setsFound: 0,
           mistakes: 0,
-          isActive: false,
           isConnected: true
         };
         
@@ -241,7 +240,6 @@ export class P2PGameService {
         score: p.score,
         setsFound: p.setsFound,
         mistakes: p.mistakes,
-        isActive: p.isActive,
         isConnected: p.isConnected
       }))
     };
