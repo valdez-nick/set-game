@@ -8,6 +8,7 @@ interface GameStatsProps {
   onUseHint: () => void;
   onPauseTimer: () => void;
   onResumeTimer: () => void;
+  onViewScoreboard: () => void;
 }
 
 const GameStats: React.FC<GameStatsProps> = ({ 
@@ -16,7 +17,8 @@ const GameStats: React.FC<GameStatsProps> = ({
   onAddCards, 
   onUseHint,
   onPauseTimer,
-  onResumeTimer
+  onResumeTimer,
+  onViewScoreboard
 }) => {
   const { foundSets, deck, hints, startTime, timerState, pausedTime, isGameOver } = gameState;
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -105,6 +107,12 @@ const GameStats: React.FC<GameStatsProps> = ({
               {timerState === 'running' ? '⏸️ Pause' : '▶️ Resume'}
             </button>
           )}
+          <button
+            onClick={onViewScoreboard}
+            className="px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+          >
+            🏆 Scoreboard
+          </button>
         </div>
         
         {/* Game over message */}

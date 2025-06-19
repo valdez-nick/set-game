@@ -16,6 +16,7 @@ export interface Card {
 export type TimerState = 'not-started' | 'running' | 'paused';
 
 export interface GameState {
+  sessionId: string;
   deck: Card[];
   board: Card[];
   selectedCards: Card[];
@@ -25,6 +26,7 @@ export interface GameState {
   startTime: number;
   timerState: TimerState;
   pausedTime: number;
+  initialDeckSize: number;
   isGameOver: boolean;
 }
 

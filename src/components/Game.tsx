@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState, Card } from '../types/game';
-import { initializeGame, selectCard, addMoreCards, useHint, pauseTimer, resumeTimer } from '../game/gameLogic';
+import { initializeGame, selectCard, addMoreCards, useHint, pauseTimer, resumeTimer, saveCurrentGameResult } from '../game/gameLogic';
 import GameBoard from './GameBoard';
 import GameStats from './GameStats';
+import Scoreboard from './Scoreboard';
 
 const Game: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [hintedCards, setHintedCards] = useState<Card[]>([]);
+  const [showScoreboard, setShowScoreboard] = useState(false);
   
   // Clear hints after 3 seconds
   useEffect(() => {
@@ -57,6 +59,21 @@ const Game: React.FC = () => {
     setGameState(newGameState);
   };
   
+  const handleViewScoreboard = () => {
+    // Save current game state if user has started playing
+    saveCurrentGameResult(gameState);
+    setShowScoreboard(true);
+  };
+  
+  const handleBackToGame = () => {
+    setShowScoreboard(false);
+  };
+  
+  // Show scoreboard if requested
+  if (showScoreboard) {
+    return <Scoreboard onBackToGame={handleBackToGame} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="container mx-auto py-8">
@@ -71,6 +88,7 @@ const Game: React.FC = () => {
           onUseHint={handleUseHint}
           onPauseTimer={handlePauseTimer}
           onResumeTimer={handleResumeTimer}
+          onViewScoreboard={handleViewScoreboard}
         />
         
         <GameBoard
@@ -88,6 +106,7 @@ const Game: React.FC = () => {
             <li>• Click cards to select them - when you select 3 cards, they'll automatically be checked</li>
             <li>• Timer starts when you click your first card - you can pause and resume anytime!</li>
             <li>• Use hints if you're stuck, or add more cards if no sets are visible</li>
+            <li>• Check your progress and compete with yourself on the scoreboard!</li>
           </ul>
         </div>
       </div>

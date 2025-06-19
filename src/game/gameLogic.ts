@@ -1,12 +1,15 @@
 import type { Card, GameState } from '../types/game';
 import { generateDeck } from './deck';
 import { isValidSet, hasValidSet } from './setValidation';
+import { saveGameResult, generateGameId } from '../utils/localStorage';
+import type { GameResult } from '../types/scoreboard';
 
 const INITIAL_BOARD_SIZE = 12;
 const MAX_BOARD_SIZE = 21;
 
 export function initializeGame(): GameState {
   const deck = generateDeck();
+  const initialDeckSize = deck.length;
   const board = deck.splice(0, INITIAL_BOARD_SIZE);
   
   // Ensure there's at least one valid set on the initial board
@@ -16,6 +19,7 @@ export function initializeGame(): GameState {
   }
   
   return {
+    sessionId: generateGameId(),
     deck,
     board,
     selectedCards: [],
@@ -25,6 +29,7 @@ export function initializeGame(): GameState {
     startTime: 0,
     timerState: 'not-started',
     pausedTime: 0,
+    initialDeckSize,
     isGameOver: false
   };
 }
@@ -85,7 +90,7 @@ function handleValidSet(gameState: GameState, foundSet: Card[]): GameState {
   // Check if game is over (no more valid sets and no more cards in deck)
   const isGameOver = deck.length === 0 && !hasValidSet(newBoard);
   
-  return {
+  const newGameState = {
     ...gameState,
     board: newBoard,
     deck: [...deck],
@@ -94,6 +99,13 @@ function handleValidSet(gameState: GameState, foundSet: Card[]): GameState {
     score: score + 1,
     isGameOver
   };
+  
+  // Save game result if game is completed
+  if (isGameOver) {
+    saveCurrentGameResult(newGameState);
+  }
+  
+  return newGameState;
 }
 
 export function addMoreCards(gameState: GameState): GameState {
@@ -175,4 +187,45 @@ export function resumeTimer(gameState: GameState): GameState {
     timerState: 'running',
     startTime: Date.now()
   };
+}
+
+// Save current game state as a result
+export function saveCurrentGameResult(gameState: GameState): void {
+  const { 
+    sessionId, 
+    foundSets, 
+    hints, 
+    startTime, 
+    timerState, 
+    pausedTime, 
+    initialDeckSize, 
+    isGameOver 
+  } = gameState;
+  
+  // Only save if the timer has started (user has played)
+  if (timerState === 'not-started') {
+    return;
+  }
+  
+  // Calculate total elapsed time
+  let completionTime = 0;
+  if (timerState === 'running') {
+    completionTime = Math.floor((Date.now() - startTime + pausedTime) / 1000);
+  } else if (timerState === 'paused') {
+    completionTime = Math.floor(pausedTime / 1000);
+  }
+  
+  const hintsUsed = 3 - hints; // Calculate hints used
+  
+  const gameResult: GameResult = {
+    id: sessionId,
+    date: new Date(),
+    setsFound: foundSets.length,
+    completionTime,
+    hintsUsed,
+    totalCards: initialDeckSize,
+    completed: isGameOver
+  };
+  
+  saveGameResult(gameResult);
 }
