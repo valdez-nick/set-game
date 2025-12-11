@@ -1,6 +1,6 @@
-# Set - a card game
+# Set
 
-A comprehensive web-based implementation of the classic Set card game, built with React and TypeScript. This game is specially made for Chace! 💜
+A web-based implementation of the classic Set card game, built with React and TypeScript.
 
 ![Set Card Game](https://img.shields.io/badge/Game-Set%20Cards-purple?style=for-the-badge)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
