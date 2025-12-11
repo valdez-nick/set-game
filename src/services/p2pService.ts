@@ -40,7 +40,7 @@ export class P2PGameService {
   private connectionCallbacks: ConnectionCallback[] = [];
   
   // Latency tracking
-  private pingIntervals: Map<string, NodeJS.Timeout> = new Map();
+  private pingIntervals: Map<string, ReturnType<typeof setInterval>> = new Map();
   private pingTimestamps: Map<string, number> = new Map();
 
   constructor() {
