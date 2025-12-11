@@ -1,4 +1,4 @@
-# Set Card Game 🎯
+# Set - a card game
 
 A comprehensive web-based implementation of the classic Set card game, built with React and TypeScript. This game is specially made for Chace! 💜
 
@@ -7,22 +7,22 @@ A comprehensive web-based implementation of the classic Set card game, built wit
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-## ✨ Features
+## Features
 
-### 🎮 Complete Game Implementation
+### Complete Game Implementation
 - **Authentic Set Rules**: Find sets of 3 cards where each feature is all same or all different
 - **81 Unique Cards**: Complete deck with 4 features (number, shape, shading, color)
 - **Smart Validation**: Automatic set detection and validation
 - **Hint System**: 3 hints per game to help when stuck
 - **Add Cards Feature**: Add 3 more cards when no sets are visible
 
-### ⏱️ Advanced Timer System
+### Advanced Timer System
 - **Smart Start**: Timer begins only when you click your first card
 - **Pause/Resume**: Full control over your game timing
 - **Accurate Tracking**: Precise time measurement excluding paused periods
 - **Visual Feedback**: Clear timer state indicators (⏱️ ready, ▶️ running, ⏸️ paused)
 
-### 🏆 Comprehensive Scoreboard
+### Comprehensive Scoreboard
 - **Automatic Tracking**: Every game result saved locally
 - **Sortable Rankings**: Sort by score, time, date, or hints used
 - **Personal Records**: Track fastest times, highest scores, perfect games
@@ -30,14 +30,7 @@ A comprehensive web-based implementation of the classic Set card game, built wit
 - **Search & Filter**: Find specific games easily
 - **Achievement System**: Highlighting personal bests and milestones
 
-### 🎨 Beautiful Design
-- **Responsive Layout**: Perfect on desktop and mobile devices
-- **SVG Card Graphics**: Crisp, scalable card designs
-- **Smooth Animations**: Card selection and hover effects
-- **Purple Theme**: Elegant color scheme designed for Chace
-- **Accessibility**: Clear visual feedback and intuitive controls
-
-## 🎯 How to Play
+## How to Play
 
 In Set, you need to find groups of 3 cards where **each of the four features** is either **all the same** or **all different** across the three cards:
 
@@ -60,7 +53,7 @@ In Set, you need to find groups of 3 cards where **each of the four features** i
 5. **Use Hints**: Get help when stuck (3 hints per game)
 6. **Track Progress**: View your performance on the scoreboard
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+ 
@@ -88,7 +81,7 @@ npm run build
 npm run preview
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend Framework**: React 18 with TypeScript
 - **Build Tool**: Vite for fast development and optimized builds
@@ -98,7 +91,7 @@ npm run preview
 - **Data Persistence**: localStorage for scoreboard data
 - **Type Safety**: Full TypeScript coverage
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -120,16 +113,7 @@ src/
 └── styles/             # Global styles
 ```
 
-## 🎨 Design Philosophy
-
-This implementation prioritizes:
-- **User Experience**: Intuitive controls and clear visual feedback
-- **Performance**: Efficient algorithms and optimized rendering
-- **Accessibility**: Clear visual hierarchy and responsive design
-- **Personalization**: Custom theming and progress tracking
-- **Maintainability**: Clean code structure and TypeScript safety
-
-## 🏆 Scoreboard Features
+## Scoreboard Features
 
 ### Performance Metrics
 - **Games Played**: Total and completed game counts
@@ -144,7 +128,7 @@ This implementation prioritizes:
 - **Export Ready**: Easy to extend with data export features
 - **Migration Support**: Versioned storage for future updates
 
-## 💡 Future Enhancements
+## Future Enhancements
 
 - **Multiplayer Mode**: Real-time play with friends
 - **Daily Challenges**: Special puzzle modes
@@ -153,11 +137,8 @@ This implementation prioritizes:
 - **Data Export**: Share your statistics
 - **Difficulty Levels**: Varying game complexities
 
-## 🤝 Contributing
 
-This is a personal project created for Chace, but suggestions and improvements are welcome!
-
-## 📄 License
+## License
 
 This project is open source and available under the [MIT License](LICENSE).
 
